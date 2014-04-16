@@ -31,8 +31,15 @@ block content
                     label(for='key') Client ID
                     input(id='key', name='key', value=defaultKey, style='color=#EEEEEE')
                   - else if (apiInfo.auth == 'basicAuth')
-                    label(for='username') User name
-                    input(id='username', name='username', value=defaultKey, style='color=#EEEEEE')
+                    - if(apiInfo.authStyle == 'readOnly')
+                      label(for='username') User name
+                      label(id='username', name='username', style='color=#FFFFFF; background-color: #888888;') 
+                        = ' ' + apiInfo.paramUsername
+                    - else if(apiInfo.authStyle == 'hidden')
+                      input(id='username', name='username', value=apiInfo.paramUsername, style='display:none;')
+                    - else
+                      label(for='username') User name
+                      input(id='username', name='username', value=apiInfo.paramUsername, style='color=#FFFFFF;')
                   - else
                     label(for='key') API Key
                     input(id='key', name='key', value=defaultKey, style='color=#EEEEEE')
@@ -41,8 +48,15 @@ block content
                       label(for='secret') Client Secret
                       input(id='secret', name='secret', value=defaultSecret, style='color=#EEEEEE')
                   - else if (apiInfo.auth == 'basicAuth')
+                    - if(apiInfo.authStyle == 'readOnly')
                       label(for='password') Password
-                      input(id='password', name='password', type='password', value=defaultKey, style='color=#EEEEEE')
+                      label(id='password', name='password', type='password', style='color=#EEEEEE; background-color: #888888;') 
+                        = ' ' + apiInfo.paramPassword
+                    - else if(apiInfo.authStyle == 'hidden')
+                      input(id='password', name='password', type='password', value=apiInfo.paramPassword, style='display:none;')
+                    - else	
+                      label(for='password') Password
+                      input(id='password', name='password', type='password', value=apiInfo.paramPassword, style='color=#EEEEEE;')
                   - if (apiInfo.signature)
                       label(for='secret') Shared Secret
                       input(id='secret', name='secret', value=defaultSecret, style='color=#EEEEEE')
@@ -145,14 +159,6 @@ block content
                                                                              option(value=choice, selected=true) #{choice}
                                                                      - else
                                                                              option(value=choice) #{choice}
-                                                        - else if (parameter.Type =='text')
-                                                            textarea(name='params[' + parameter.Name + ']', placeholder=className)
-                                                               if (parameter.Default)
-                                                                  | #{parameter.Default}
-                                                            input(type='hidden', name='locations['+parameter.Name+']', value=parameter.Location || 'query')
-                                                        - else if (parameter.Type =='password')
-                                                            input(type='password', name='params[' + parameter.Name + ']', value=parameter.Default)
-                                                            input(type='hidden', name='locations['+parameter.Name+']', value=parameter.Location || 'query')
                                                         - else
                                                             input(name='params[' + parameter.Name + ']', value=parameter.Default, placeholder=className)
                                                             input(type='hidden', name='locations['+parameter.Name+']', value=parameter.Location || 'query')

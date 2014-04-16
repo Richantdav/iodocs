@@ -35,30 +35,17 @@ var express     = require('express'),
     http        = require('http'),
     https       = require('https'),
     crypto      = require('crypto'),
-    clone       = require('clone'),
     redis       = require('redis'),
     RedisStore  = require('connect-redis')(express);
 
-// Parse arguments
-var optimist = require('optimist')
-        .usage('Usage: $0 --config-file [file]')
-        .alias('c', 'config-file')
-        .alias('h', 'help')
-        .describe('c', 'Specify the config file location')
-        .default('c', './config.json');
-var argv = optimist.argv;
-
-if (argv.help) {
-    optimist.showHelp();
-    process.exit(0);
-}
-
+var passedInUsername = "";
+var passedInPassword = "";
+	
 // Configuration
-var configFilePath = path.resolve(argv['config-file']);
 try {
     var config = require('./config.json');
 } catch(e) {
-    console.error("File " + configFilePath + " not found or is invalid.  Try: `cp config.json.sample config.json`");
+    console.error("File config.json not found or is invalid.  Try: `cp config.json.sample config.json`");
     process.exit(1);
 }
 
@@ -66,7 +53,6 @@ try {
 // Redis connection
 //
 var defaultDB = '0';
-if(config.redis) {
 config.redis.database = config.redis.database || defaultDB;
 
 if (process.env.REDISTOGO_URL) {
@@ -84,7 +70,6 @@ db.on("error", function(err) {
          console.log("Error " + err);
     }
 });
-}
 
 //
 // Load API Configs
@@ -115,7 +100,6 @@ app.configure(function() {
     app.use(express.bodyParser());
     app.use(express.methodOverride());
     app.use(express.cookieParser());
-if(config.redis) {
     app.use(express.session({
         secret: config.sessionSecret,
         store:  new RedisStore({
@@ -126,11 +110,6 @@ if(config.redis) {
             'maxAge': 1209600000
         })
     }));
-} else {
-    app.use(express.session({
-        secret: config.sessionSecret
-    }));
-} 
 
     // Global basic authentication on server (applied if configured)
     if (config.basicAuth && config.basicAuth.username && config.basicAuth.password) {
@@ -566,7 +545,7 @@ function processRequest(req, res, next) {
         privateReqURL = apiConfig.protocol + '://' + apiConfig.baseURL + apiConfig.privatePath + methodURL + ((paramString.length > 0) ? '?' + paramString : ""),
         options = {
             rejectUnauthorized: false,
-	    headers: clone(apiConfig.headers),
+	    headers: headers,
             protocol: apiConfig.protocol + ':',
             host: baseHostUrl,
             port: baseHostPort,
@@ -812,6 +791,15 @@ function processRequest(req, res, next) {
         if (apiConfig.auth == 'basicAuth') {
             options.headers['Authorization'] = 'Basic ' + new Buffer(reqQuery.apiUsername + ':' + reqQuery.apiPassword).toString('base64');
             console.log(options.headers['Authorization'] );
+			
+			if (apiConfig.authStyle == 'readOnly') {
+				console.log('authStyle is READONLY');
+			} else if (apiConfig.authStyle == 'hidden') {
+				console.log('authStyle is HIDDEN');
+			} else {
+				console.log('authStyle is VISIBLE');
+			}
+			
         }
         
         // Perform signature routine, if any.
@@ -935,8 +923,24 @@ function processRequest(req, res, next) {
     }
 }
 
-
 function checkPathForAPI(req, res, next) {
+
+	// check for username-password URL parameters and fix the req.url if required
+	var split=req.url.split("?");
+	if(split.length >= 2){
+		req.url = split[0];
+		var params = split[1].split("&");
+		for (var i = 0; i < params.length ; i++) {
+			if(params[i].indexOf("username=") >= 0){
+				passedInUsername = decodeURIComponent(params[i].substring(9));
+			}
+			if(params[i].indexOf("password=") >= 0){
+				passedInPassword = decodeURIComponent(params[i].substring(9));
+			}
+		}
+		
+	}
+
     if (!req.params) req.params = {};
     if (!req.params.api) {
         // If api wasn't passed in as a parameter, check the path to see if it's there
@@ -969,6 +973,10 @@ function dynamicHelpers(req, res, next) {
         res.locals.apiInfo = apisConfig;
     }
 
+	// pass the username-password into apiInfo so we can see them in Jade
+	res.locals.apiInfo.paramUsername = passedInUsername;
+	res.locals.apiInfo.paramPassword = passedInPassword;
+	
     res.locals.session = req.session;
     next();
 }

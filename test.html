@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width">
+	<title>API | Living Labs</title>
+	
+	<script type='text/javascript' src='jquery-2.1.0.js'></script>
+	
+</head>
+
+<body class="page page-id-61 page-template page-template-page-api-docs-php logged-in single-author"><noscript><meta HTTP-EQUIV="refresh" content="0;url='http://54.194.41.160/api-docs/?ModPagespeed=noscript'" /><style><!--table,div,span,font,p{display:none} --></style><div style="display:block">Please click <a href="http://54.194.41.160/api-docs/?ModPagespeed=noscript">here</a> if you are not redirected within a few seconds.</div></noscript>
+<div>
+	<p>Application name: <span>testEmail</span></p>
+	<p>Application username: <span>testEmail</span></p>
+	<p>Application password: <span>p@55w0rd</span></p>
+	<br/><p>Application name: <span>ASE System Application</span></p>
+	<p>Application username: <span>_systemAseApplication</span></p>
+	<p>Application password: <span>p@55w0rd</span></p><br/>
+	<p>Application name: <span>markZooSOTest</span></p>
+	<p>Application username: <span>markZooSOTest</span></p>
+	<p>Application password: <span>p@55w0rd</span></p>
+	<br/><p>Application name: <span>publicdevicesensorapi</span></p>
+	<p>Application username: <span>iodocsuser</span></p>
+	<p>Application password: <span>p@55w0rd</span></p>
+	<br/><p>Application name: <span>testPrepaid</span></p>
+	<p>Application username: <span>testPrepaid</span></p>
+	<p>Application password: <span>p@55w0rd</span></p>
+	<br/><p>Application name: <span>justin</span></p>
+	<p>Application username: <span>justin</span></p>
+	<p>Application password: <span>p@55w0rd</span></p>
+	<br/><p>Application name: <span>fccdevicesensorapi</span></p>
+	<p>Application username: <span>fccdevicesensorapi</span></p>
+	<p>Application password: <span>p@55w0rd</span></p><br/>
+	<p>Application name: <span>testApp</span></p>
+	<p>Application username: <span>testApp</span></p>
+	<p>Application password: <span>p@55w0rd</span></p>
+	<br/><p>Application name: <span>markZooQATest</span>
+	</p><p>Application username: <span>markZooQATest</span></p>
+	<p>Application password: <span>p@55w0rd</span></p>
+	<br/><p>Application name: <span>Labs Support Application</span></p>
+	<p>Application username: <span>labsSupport</span></p>
+	<p>Application password: <span>aw8s0m8!</span></p><br/>                    
+	</div>
+
+	<div>
+	Choose an application/IOT Service
+	</div>
+
+	 <div>
+		<div class="app-listings">
+			<select id="AppServiceChoiceDropDown">
+				<option value="defaultValue"></option>
+				<option value="testEmail&p@55w0rd">testEmail</option>
+				<option value="_systemAseApplication&p@55w0rd">ASE System Application</option>
+				<option value="markZooSOTest&p@55w0rd">markZooSOTest</option>
+				<option value="iodocsuser&p@55w0rd">publicdevicesensorapi</option>
+				<option value="testPrepaid&p@55w0rd">testPrepaid</option>
+				<option value="justin&p@55w0rd">justin</option>
+				<option value="fccdevicesensorapi&p@55w0rd">fccdevicesensorapi</option>
+				<option value="testApp&p@55w0rd">testApp</option>
+				<option value="markZooQATest&p@55w0rd">markZooQATest</option>
+				<option value="labsSupport&aw8s0m8!">Labs Support Application</option>
+			</select>
+		</div>
+	</div>
+	
+	<div id="iodocsIframeDiv">
+	</div>
+	
+<script>
+
+$("#AppServiceChoiceDropDown").change(function () {
+	
+    if ($(this).val() == "defaultValue") {
+        $("#iodocsIframeDiv").html("");
+    } else {
+        console.log('choice made, val = : ' + $(this).val() + ', text = ' + $('#AppServiceChoiceDropDown :selected').text());
+		
+		var params = $(this).val().split("&");
+		
+		if(params.length != 2){
+			console.error("don't have a valid username-password for this application");
+		} else {
+		
+		    var iframe = $("<iframe>").attr({
+				"src": "http://localhost:3001/publicAPI" + "?username=" + encodeURIComponent(params[0]) + "&password=" + encodeURIComponent(params[1]),
+				"id": "iodocs",
+				"width": "1200",
+				"height": "700",
+				"frameborder": "0"
+			});
+			
+			$("#iodocsIframeDiv").html("");
+			$("#iodocsIframeDiv").append(iframe);
+		}
+    }
+});
+		
+</script>			
+	
+</body>
+</html>
